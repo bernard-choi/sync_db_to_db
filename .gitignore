@@ -137,6 +137,6 @@ dmypy.json
 # Cython debug symbols
 cython_debug/
 
-./sync_tables.py
+sync_tables.py
 
 
