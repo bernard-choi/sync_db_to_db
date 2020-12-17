@@ -9,7 +9,7 @@ import pandas as pd
 from pyjin import pyjin
 from x_x import account_info as ai
 
-from sync_tables import Infor, Infor_urgent
+import sync_tables
 from module import all_delete_insert
 from module import delete_upsert
 from module import create_table
@@ -43,7 +43,7 @@ def get_mode(acc_from, acc_to, db_from, db_to, table_from, table_to, primary_key
 
 
 def main(mode):           
-    table_list = Infor.table_list if mode == 0 else Infor_urgent.table_list    
+    table_list = sync_tables.Infor.table_list if mode == 0 else sync_tables.Infor_urgent.table_list    
      
     for row in table_list:  
         pyjin.print_logging('{} table sync...'.format(row['table_from']))
