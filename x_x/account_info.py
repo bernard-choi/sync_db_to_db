@@ -28,7 +28,7 @@ def vmdb_sql_info(db='ople'):
 # dbtype default : mysql
 def vmdb2_sql_info(db='postgres'):
     return {
-        'host' :'222.107.129.210',
+        'host' :'localhost',
         'user' : 'postgres',
         'password' : 'x_x@song2ro',
         'db' : 'postgres',
