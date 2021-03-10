@@ -31,7 +31,7 @@ def vmdb2_sql_info(db='postgres'):
         'host' :'localhost',
         'user' : 'postgres',
         'password' : 'x_x@song2ro',
-        'db' : 'postgres',
+        'db' : db,
         'port' : 5432,
         'dbtype' : 'postgresql+psycopg2'
     }
