@@ -46,7 +46,7 @@ def main(mode):
     table_list = sync_tables.Infor.table_list if mode == 0 else sync_tables.Infor_urgent.table_list    
      
     for row in table_list:  
-        pyjin.print_logging('{} table sync...'.format(row['table_from']))
+        pyjin.print_logging('{}.{} table sync...'.format(row['db_from'],row['table_from']))
                         
         '''
         when no col_matching, default value is to
