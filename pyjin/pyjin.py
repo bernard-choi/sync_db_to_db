@@ -9,6 +9,7 @@ from sqlalchemy import create_engine, text
 from sqlalchemy.pool import Pool, NullPool
 from sqlalchemy import create_engine, text
 import numpy as np
+import psycopg2
 
 pd.options.display.float_format = '{:,.2f}'.format
 pd.set_option('display.max_columns',None)
@@ -260,9 +261,14 @@ class DB_al:
             
             
             
-def connectDB(host, port, user, password, db, engine_type='None', dbtype='mysql+pymysql'):    
-    connect_args={'ssl':{'fake_flag_to_enable_tls': True}}    
-    db = '{dbtype}://{user}:{password}@{host}:{port}/{db}?charset=utf8&ssl=true'.format(dbtype=dbtype, host=host,user=user,port=port,password=password,db=db)
+def connectDB(host, port, user, password, db, engine_type='None',dbtype='mysql+pymysql'):    
+    connect_args = {}
+    if dbtype == 'mysql+pymysql':
+        connect_args={'ssl':{'fake_flag_to_enable_tls': True}}   
+        db = '{dbtype}://{user}:{password}@{host}:{port}/{db}?charset=utf8&ssl=true'.format(dbtype='mysql+pymysql', host=host, user=user, port=port, password=password, db=db)
+    
+    else:
+        db = '{dbtype}://{user}:{password}@{host}:{port}/{db}'.format(dbtype='postgresql+psycopg2', host=host, user=user, port=port, password=password, db=db)
 
     if engine_type=='NullPool':
         engine = create_engine(db, connect_args=connect_args, poolclass=NullPool, pool_recycle=100)

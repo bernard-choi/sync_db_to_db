@@ -24,3 +24,14 @@ def vmdb_sql_info(db='ople'):
         'db' : db,
         'port' : 3306,
     }
+
+# dbtype default : mysql
+def vmdb2_sql_info(db='postgres'):
+    return {
+        'host' :'localhost',
+        'user' : 'postgres',
+        'password' : 'x_x@song2ro',
+        'db' : db,
+        'port' : 5432,
+        'dbtype' : 'postgresql+psycopg2'
+    }
