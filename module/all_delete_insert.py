@@ -49,11 +49,10 @@ def main(acc_from,
                 ## delete all data
                 ## release foreignkey when deleting table and restore
                 pyjin.execute_query(con,"SET foreign_key_checks = 0")
-                pyjin.execute_query(con, 'delete from {}.{}'.format(db_to, table_to))
-                pyjin.execute_query(con,"SET foreign_key_checks = 1")                
+                pyjin.execute_query(con, 'delete from {}.{}'.format(db_to, table_to))          
                 ## write data
                 df_from.to_sql(table_to, con=con, if_exists='append', index=False, chunksize=5000, method='multi', schema=db_to) ## 큰 query 처리 불가능한 경우를 위해 chunksize 추가
-        
+                pyjin.execute_query(con,"SET foreign_key_checks = 1")       
         except Exception as e:
             pyjin.print_logging("{} delete and write failed, {}".format(table_to, e))
 
