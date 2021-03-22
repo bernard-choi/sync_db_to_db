@@ -91,20 +91,23 @@ def main(acc_from, acc_to, db_from, db_to, table_from, table_to, mode, primary_k
             # delete_id, update_id 삭제하기
             if len(list_delete_update_ids):
                 ## delete upsert_ids
-                ## release foreignkey when deleting table and restore
                 pyjin.execute_query(con,"SET foreign_key_checks = 0")
+                ## release foreignkey when deleting table and restore
                 pyjin.execute_query(con, 
                                         """
                                         delete from {}.{} where {} in :ids
                                         """.format(db_to, table_to, primary_key),
                                             ids = list_delete_update_ids,                                          
                                         is_return=False)
-                pyjin.execute_query(con,"SET foreign_key_checks = 1")            
+                pyjin.execute_query(con,"SET foreign_key_checks = 1")
+       
             pyjin.print_logging('{} (update), {} (delete) rows deleted'.format(len(update_ids), len(delete_ids)))
 
             # update_id, insert_id 정보 업데이트 하기
             if len(list_insert_update_ids):
+                pyjin.execute_query(con,"SET foreign_key_checks = 0")
                 df_upsert.to_sql(table_to, con=con, schema=db_to, index=False, if_exists='append', chunksize=5000, method='multi')
+                pyjin.execute_query(con,"SET foreign_key_checks = 1")
 
             pyjin.print_logging('{} (update), {} (insert) data inserted'.format(len(update_ids), len(insert_ids)))
     
