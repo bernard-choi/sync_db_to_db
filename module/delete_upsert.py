@@ -51,7 +51,7 @@ def get_df_whole(acc, mode, db, table):
         return df
 
 def main(acc_from, acc_to, db_from, db_to, table_from, table_to, mode, primary_key, col_matching):    
-    ## bring all id, update_date(if eixtst) data from service and anal server
+    ## bring all id, update_date(if eixtst) data from 'from' and 'to'
     df_from = get_df_whole(acc=acc_from, mode=mode, db=db_from, table=table_from)    
     df_to = get_df_whole(acc=acc_to, mode=mode, db=db_to, table=table_to)
     

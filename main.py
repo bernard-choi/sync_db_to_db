@@ -69,6 +69,8 @@ def main(mode):
             pyjin.print_logging('mode is {}'.format(mode))
                     
             if mode == 'no_table':
+                # table이 애초에 존재하지 않을겨우 생성
+                # schema structure 가 형성되지 않으므로 추천하지 않음
                 print('create_table start')
                 create_table.main(acc_from = row['acc_from'],
                             acc_to = row['acc_to'],
@@ -78,7 +80,7 @@ def main(mode):
                             table_to = row['table_to'],
                             primary_key = row['primary_key'])
                         
-            elif mode is not None:            
+            elif mode is not None:                   
                 print('delete_upsert start')
                 delete_upsert.main(acc_from = row['acc_from'], 
                                 acc_to = row['acc_to'],
