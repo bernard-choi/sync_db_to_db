@@ -2,16 +2,16 @@ import pandas as pd
 import numpy as np 
 
 from pyjin import pyjin
-from module import general
+from module import db_module
 
-def get_insert_update_delete_ids(df_from, df_to, mode, primary_key):
+def get_insert_update_delete_ids(df_from, df_to, update_mode, primary_key):
     ids_from = df_from[primary_key].to_numpy()
     ids_to = df_to[primary_key].to_numpy()
 
     ## delete ids
     delete_ids = np.setdiff1d(ids_to, ids_from)
 
-    if mode == '{},update_date'.format(primary_key):
+    if update_mode == '{},update_date'.format(primary_key):
         ## update 할 id
         temp = pd.merge(df_from, df_to, on=primary_key)
         update_ids = temp[temp['update_date_x'] != temp['update_date_y']][primary_key].to_numpy()        
@@ -38,37 +38,45 @@ def get_upsert_data(acc_from, list_insert_update_ids, columns_df_to, db, table, 
     
     return df_upsert
 
-def get_df_whole(acc, mode, db, table):
+def get_df_whole(acc, update_mode, db, table):
     with pyjin.connectDB(**acc, engine_type='NullPool') as con:         
         pyjin.execute_query(con,"SET SESSION TRANSACTION ISOLATION LEVEL READ UNCOMMITTED")
         df=pyjin.execute_query(con,
                                 """
-                                select {mode} from {db}.{table}
-                                """.format(mode=mode, db=db, table=table)
+                                select {update_mode} from {db}.{table}
+                                """.format(update_mode=update_mode, db=db, table=table)
                                 , output='df')  
         
         pyjin.execute_query(con,"SET SESSION TRANSACTION ISOLATION LEVEL REPEATABLE READ")
         return df
 
-def main(acc_from, acc_to, db_from, db_to, table_from, table_to, mode, primary_key, col_matching):    
+def main(acc_from, 
+         acc_to, 
+         db_from, 
+         db_to, 
+         table_from, 
+         table_to, 
+         update_mode, 
+         primary_key, 
+         col_matching):    
     ## bring all id, update_date(if eixtst) data from 'from' and 'to'
-    df_from = get_df_whole(acc=acc_from, mode=mode, db=db_from, table=table_from)    
-    df_to = get_df_whole(acc=acc_to, mode=mode, db=db_to, table=table_to)
+    df_from = get_df_whole(acc=acc_from, update_mode=update_mode, db=db_from, table=table_from)    
+    df_to = get_df_whole(acc=acc_to, update_mode=update_mode, db=db_to, table=table_to)
     
     ## calculate insert_ids, update_ids, delete_ids
-    insert_ids, update_ids, delete_ids = get_insert_update_delete_ids(df_from, df_to, mode, primary_key=primary_key)
+    insert_ids, update_ids, delete_ids = get_insert_update_delete_ids(df_from, df_to, update_mode, primary_key=primary_key)
     
     '''
     update 할것과 delete 할것을 -> delete
     update 할것과 new rows 할것 -> insert
     (update data는 사실상 replaced)
     '''
-    list_delete_update_ids = delete_ids.tolist()+ update_ids.tolist()
+    list_delete_update_ids = delete_ids.tolist() + update_ids.tolist()
     list_insert_update_ids = insert_ids.tolist() + update_ids.tolist()    
         
     # upsert
     if len(list_insert_update_ids): 
-        columns_bring = general.get_col_matched(
+        columns_bring = db_module.get_col_matched(
             acc_from = acc_from,
             acc_to = acc_to, 
             db_from = db_from, 

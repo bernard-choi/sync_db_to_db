@@ -5,7 +5,7 @@ import pandas as pd
 import numpy as np
 
 from pyjin import pyjin
-from module import general
+from module import db_module
 
 def main(acc_from, 
          acc_to, 
@@ -18,16 +18,10 @@ def main(acc_from,
     '''
     service server 에서 데이터 가져오기
     '''
-    with pyjin.connectDB(**acc_from, engine_type='NullPool') as con:
-        query='''
-        select * from {}.{}
-        '''.format(db_from, table_from)
-        pyjin.execute_query(con,"SET SESSION TRANSACTION ISOLATION LEVEL READ UNCOMMITTED")
-        df_from=pyjin.execute_query(con, query, output='df')
-        pyjin.execute_query(con,"SET SESSION TRANSACTION ISOLATION LEVEL REPEATABLE READ")        
-        
+    with pyjin.connectDB(**acc_from, engine_type='NullPool') as con_from:
+        df_from = db_module.read_sqldata(con_from, db_from, table_from)
                 
-    columns_bring = general.get_col_matched(
+    columns_bring = db_module.get_col_matched(
         acc_from = acc_from,
         acc_to = acc_to, 
         db_from = db_from, 
@@ -36,7 +30,7 @@ def main(acc_from,
         table_to = table_to, 
         col_matching= col_matching    
         )
-
+    
     df_from = df_from[columns_bring] 
 
     '''
@@ -47,7 +41,7 @@ def main(acc_from,
             ## transaction
             with con.begin():
                 ## delete all data
-                ## release foreignkey when deleting table and restore
+                ## release foreignkey constrains when deleting tables and restore
                 pyjin.execute_query(con,"SET foreign_key_checks = 0")
                 pyjin.execute_query(con, 'delete from {}.{}'.format(db_to, table_to))          
                 ## write data
