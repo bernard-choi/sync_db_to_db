@@ -92,8 +92,14 @@ def main(mode):
                         
             elif mode is not None:                   
                 print('delete_upsert start')
-                delete_upsert.main(row,
-                                   mode = mode,)
+                delete_upsert.Main(acc_from = row['acc_from'],
+                                    acc_to = row['acc_to'],
+                                    db_from = row['db_from'],
+                                    db_to = row['db_to'],
+                                    table_from = row['table_from'],
+                                    table_to = row['table_to'],
+                                    primary_key = row['primary_key'],
+                                    mode = mode)
                                             
             elif mode is None:
                 print('all_delete_insert start')

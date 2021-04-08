@@ -109,7 +109,7 @@ class Main:
                  table_from,
                  primary_key,                 
                  mode,
-                 column_matching_method,
+                 column_matching_method = 'to',
                  **kwargs):
         
         self.acc_to = acc_to
