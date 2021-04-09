@@ -47,7 +47,7 @@ def main(acc_from,
         db_to = db_to, 
         table_from = table_from, 
         table_to = table_to, 
-        col_matching= col_matching    
+        column_matching_method= col_matching    
         )
         
     df_from = df_from[columns_bring]

@@ -30,10 +30,10 @@ class Infor_urgent:
     table_list.append({
         'acc_from' : ai.analdb_sql_info(),
         'acc_to' : ai.vmdb_sql_info(),
-        'db_from': 'data_sc',
-        'table_from' : 'date_holiday',
-        'db_to' : 'data_sc',
-        'table_to' : 'date_holiday',
+        'db_from': 'ople',
+        'table_from' : 'rest_oplemember',
+        'db_to' : 'ople',
+        'table_to' : 'rest_oplemember',
         'primary_key' : 'id'
     })
     

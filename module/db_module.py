@@ -31,15 +31,15 @@ def get_col_matched(acc_from,
                     column_matching_method):
     
     ## bring all columns of the table_to
-    columns_df_to = pyjin.conn_exec_close(acc_to, 
-                                    """
-                                    select column_name
-                                    from INFORMATION_SCHEMA.COLUMNS
-                                    where TABLE_NAME=:table and TABLE_SCHEMA =:db
-                                    """, 
-                                    db=db_to, 
-                                    table=table_to, 
-                                    output='df')['column_name'].tolist()        
+    columns_df_to = pyjin.conn_exec_close(acc_to,
+                                """
+                                select column_name
+                                from INFORMATION_SCHEMA.COLUMNS
+                                where TABLE_NAME=:table and TABLE_SCHEMA =:db
+                                """, 
+                                db=db_to, 
+                                table=table_to, 
+                                output='df')['column_name'].tolist()        
     
     columns_df_from = pyjin.conn_exec_close(acc_from, 
                                 """
@@ -49,7 +49,7 @@ def get_col_matched(acc_from,
                                 """, 
                                 db=db_from, 
                                 table=table_from, 
-                                output='df')['column_name'].tolist()            
+                                output='df')['column_name'].tolist()
             
     if column_matching_method == 'both':
         columns_bring = list(set(columns_df_from).intersection(set(columns_df_to)))

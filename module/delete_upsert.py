@@ -4,13 +4,16 @@ import numpy as np
 from pyjin import pyjin
 from module import db_module
 
-def get_df_whole(acc, db, table, update_mode):
+def get_df_whole(acc, 
+                 db, 
+                 table, 
+                 mode):
     with pyjin.connectDB(**acc, engine_type='NullPool') as con:         
         pyjin.execute_query(con,"SET SESSION TRANSACTION ISOLATION LEVEL READ UNCOMMITTED")            
         df=pyjin.execute_query(con,
                                 """
-                                select {update_mode} from {db}.{table}
-                                """.format(update_mode=update_mode, db=db, table=table)
+                                select {mode} from {db}.{table}
+                                """.format(mode=mode, db=db, table=table)
                                 , output='df')        
         pyjin.execute_query(con,"SET SESSION TRANSACTION ISOLATION LEVEL REPEATABLE READ")
     return df
@@ -56,50 +59,48 @@ def get_upsert_data(acc_from,
     return df_upsert  
 
 
-def delete_upsert(df_upsert,
-                  acc_to,
+def delete_upsert(acc_to,
                   db_to,
                   table_to,
                   update_ids,
                   insert_ids,
                   delete_ids,
                   list_insert_update_ids,
-                  list_delete_update_ids,):
+                  list_delete_update_ids,
+                  primary_key,
+                  df_upsert=None,):    
     
-    try:    
-        ## delete , upsert
-        with pyjin.connectDB(**acc_to, engine_type='NullPool') as con:         
-            with con.begin():
-                # delete_id, update_id 삭제하기
-                if len(list_delete_update_ids):
-                    ## delete upsert_ids
-                    pyjin.execute_query(con,"SET foreign_key_checks = 0")
-                    ## release foreignkey when deleting table and restore
-                    pyjin.execute_query(con, 
-                                            """
-                                            delete from {}.{} where {} in :ids
-                                            """.format(db_to, table_to, primary_key),
-                                            ids = list_delete_update_ids,                                          
-                                            is_return=False)
-                    pyjin.execute_query(con,"SET foreign_key_checks = 1")
-        
-                pyjin.print_logging('{} (update), {} (delete) rows deleted'.format(len(update_ids), len(delete_ids)))
-
+    ## delete , upsert
+    with pyjin.connectDB(**acc_to, engine_type='NullPool') as con:         
+        with con.begin():
+            # delete_id, update_id 삭제하기
+            if len(list_delete_update_ids):
+                ## delete upsert_ids
+                pyjin.execute_query(con,"SET foreign_key_checks = 0")
+                ## release foreignkey when deleting table and restore
+                pyjin.execute_query(con, 
+                                        """
+                                        delete from {}.{} where {} in :ids
+                                        """.format(db_to, table_to, primary_key),
+                                        ids = list_delete_update_ids,                                          
+                                        is_return=False)
+                pyjin.execute_query(con,"SET foreign_key_checks = 1")
+    
+            pyjin.print_logging('{} (update), {} (delete) rows deleted'.format(len(update_ids), len(delete_ids)))
+            
+            if df_upsert is not None:
                 # update_id, insert_id 정보 업데이트 하기
                 if len(list_insert_update_ids):
                     pyjin.execute_query(con,"SET foreign_key_checks = 0")
                     df_upsert.to_sql(table_to, con=con, schema=db_to, index=False, if_exists='append', chunksize=5000, method='multi')
                     pyjin.execute_query(con,"SET foreign_key_checks = 1")
 
-                pyjin.print_logging('{} (update), {} (insert) data inserted'.format(len(update_ids), len(insert_ids)))
-                
-                
-    except BaseException as e:        
-        raise Exception(e)
+            pyjin.print_logging('{} (update), {} (insert) data inserted'.format(len(update_ids), len(insert_ids)))
+    
+    return True
 
 
-class Main:
-            
+class Main:            
     def __init__(self, 
                  acc_to,
                  acc_from,
@@ -123,24 +124,30 @@ class Main:
         self.mode = mode
         
     def __call__(self,):
-        return self.main()        
+        self.main() 
+        return True       
     
     def set_df_to(self,):
         res = get_df_whole(db= self.db_to,
-                            table = self.table_to)     
+                           acc = self.acc_to,
+                           table = self.table_to,
+                           mode= self.mode)     
         return res
         
     def set_df_from(self,):
         res = get_df_whole(db= self.db_from,
-                                table = self.table_from)   
+                           acc = self.acc_from,
+                           table = self.table_from,
+                           mode= self.mode)   
         return res
         
-    def set_upsert_data(self, list_insert_update_ids): 
+    def set_upsert_data(self, list_insert_update_ids, sync_columns): 
         df_upsert = get_upsert_data(acc_from = self.acc_from,                                                                                  
-                                    db = self.db_from,
-                                    table = self.table_from,
+                                    db_from = self.db_from,
+                                    table_from = self.table_from,
                                     primary_key = self.primary_key,
-                                    list_insert_update_ids= list_insert_update_ids)
+                                    list_insert_update_ids= list_insert_update_ids,
+                                    sync_columns=sync_columns)
         return df_upsert
         
     def set_column_matching(self,):
@@ -148,13 +155,13 @@ class Main:
                                         acc_to = self.acc_to, 
                                         db_from = self.db_from, 
                                         db_to = self.db_to, 
-                                        table_from = table_from, 
-                                        table_to = table_to, 
+                                        table_from = self.table_from, 
+                                        table_to = self.table_to, 
                                         column_matching_method = self.column_matching_method)
         return res
         
             
-    def main(self,):        
+    def main(self,):                
         df_to = self.set_df_to()
         df_from = self.set_df_from()
         
@@ -164,10 +171,10 @@ class Main:
         (update data는 사실상 replaced)
         '''                        
         ## calculate insert_ids, update_ids, delete_ids
-        insert_ids, update_ids, delete_ids = get_insert_update_delete_ids(df_from = self.df_from,
-                                                                          df_to = self.df_to,
+        insert_ids, update_ids, delete_ids = get_insert_update_delete_ids(df_from = df_from,
+                                                                          df_to = df_to,
                                                                           primary_key = self.primary_key,
-                                                                          mode= self.mode)     
+                                                                          mode= self.mode)    
     
         
         list_delete_update_ids = delete_ids.tolist() + update_ids.tolist()
@@ -175,22 +182,29 @@ class Main:
         
         # update ids 있는경우
         if len(list_insert_update_ids):             
-            sync_columns = self.set_column_matching(table_to = self.table_to, table_from = self.table_from)
-                                              
+            sync_columns = self.set_column_matching()
             df_upsert = self.set_upsert_data(
                                     list_insert_update_ids= list_insert_update_ids,
-                                    sync_columns = sync_columns)                    
+                                    sync_columns = sync_columns)
+        else:
+            df_upsert = None               
+            
+            
+        try:        
+            delete_upsert(df_upsert = df_upsert,
+                        acc_to = self.acc_to,
+                        db_to = self.db_to,
+                        table_to = self.table_to,
+                        delete_ids = delete_ids,
+                        update_ids = update_ids,
+                        insert_ids = insert_ids,
+                        list_insert_update_ids = list_insert_update_ids,
+                        list_delete_update_ids = list_delete_update_ids,
+                        primary_key = self.primary_key)            
+                       
+        except BaseException as e:        
+            raise Exception(e)                        
         
-        delete_upsert(df_upsert = df_upsert,
-                      acc_to = self.acc_to,
-                      db_to = self.db_to,
-                      table_to = self.table_to,
-                      update_id = update_ids,
-                      insert_id = insert_ids,
-                      list_insert_update_ids = list_insert_update_ids,
-                      list_delete_update_ids = list_insert_update_ids )
-    
-        return True
 
 
 def get_col_matched_from_df(df_from,
@@ -216,9 +230,9 @@ def get_col_matched_from_df(df_from,
     if column_matching_method == 'both':
         columns_bring = list(set(columns_from).intersection(set(columns_to)))
     elif column_matching_method == 'to':
-        columns_bring = columns_df_to
+        columns_bring = columns_to
     elif column_matching_method == 'from':
-        columns_bring = columns_dict_from
+        columns_bring = columns_from
     else:
         raise Exception('not proper matching_mode')
     return columns_bring
@@ -265,6 +279,7 @@ class Main_by_json(Main):
                                                 acc_to= self.acc_to,
                                                 db_to = self.db_to,
                                                 table_to = self.table_to,
-                                                column_matching_method = self.column_matching_method)        
+                                                column_matching_method = self.column_matching_method)
+                
         return columns_bring
             

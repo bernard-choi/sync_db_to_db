@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
+import traceback
 import datetime
 import sys
 
@@ -46,13 +47,12 @@ def get_mode(acc_from,
     elif primary_key in columns_df_from:
         return primary_key
 
-def main(mode):           
+def main(batch_mode):           
     '''
     mode 0 -> non_urgent_mode
     mode 1 -> urgent mode
-    '''            
-    
-    table_list = sync_tables.Infor.table_list if mode == 0 else sync_tables.Infor_urgent.table_list    
+    '''                
+    table_list = sync_tables.Infor.table_list if batch_mode == 0 else sync_tables.Infor_urgent.table_list
      
     for row in table_list:  
         pyjin.print_logging('{}.{} table sync...'.format(row['db_from'], row['table_from']))
@@ -99,7 +99,9 @@ def main(mode):
                                     table_from = row['table_from'],
                                     table_to = row['table_to'],
                                     primary_key = row['primary_key'],
-                                    mode = mode)
+                                    mode = mode)()
+                
+                
                                             
             elif mode is None:
                 print('all_delete_insert start')
@@ -114,4 +116,6 @@ def main(mode):
             pyjin.print_logging('completed')  
                 
         except Exception as e:
+            
             pyjin.print_logging("failed, error: {}".format(e))
+            print(traceback.format_exc())
