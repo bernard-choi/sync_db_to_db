@@ -5,13 +5,10 @@ import functools
 
 import pandas as pd
 
-import sync_tables
-from pyjin import pyjin
-from x_x import account_info as ai
-from module import all_delete_insert
-from module import delete_upsert
-from module import create_table
-from module import db_module
+from  .module import all_delete_insert
+from .module import delete_upsert
+from .module import create_table
+from .module import db_module
 
 def get_mode(df_from,
              acc_to,              
