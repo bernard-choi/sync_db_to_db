@@ -1,6 +1,6 @@
 import pandas as pd
 
-from pyjin import pyjin
+from ..pyjin import pyjin
 
 def read_sqldata(con_from, 
                  db_from, 

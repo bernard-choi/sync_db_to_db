@@ -2,9 +2,8 @@ import datetime
 
 import pandas as pd
 
-from pyjin import pyjin
-from x_x import account_info as ai
-from module import db_module
+from ..pyjin import pyjin
+from . import db_module
 
 def get_query_alter_primary_key(db_name, table_name, primary_key):    
     return "ALTER TABLE {}.{} ADD PRIMARY KEY({})".format(db_name, table_name, primary_key)

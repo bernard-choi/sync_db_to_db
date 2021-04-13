@@ -4,8 +4,8 @@ import datetime
 import pandas as pd
 import numpy as np
 
-from pyjin import pyjin
-from module import db_module
+from ..pyjin import pyjin
+from . import db_module
 
 def delete_all_insert_all(acc_to, df ,table_to, db_to):
     with pyjin.connectDB(**acc_to, engine_type='NullPool') as con:
@@ -22,8 +22,7 @@ def delete_all_insert_all(acc_to, df ,table_to, db_to):
                 df.to_sql(table_to, con=con, if_exists='append', index=False, chunksize=5000, method='multi', schema=db_to)                               
                 pyjin.execute_query(con,"SET foreign_key_checks = 1")                     
         except Exception as e:
-            pyjin.print_logging("{} delete and write failed, {}".format(table_to, e))    
-        
+            pyjin.print_logging("{} delete and write failed, {}".format(table_to, e))            
     return True
 
 def main(acc_from, 

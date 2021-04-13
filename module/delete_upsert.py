@@ -1,8 +1,8 @@
 import pandas as pd
 import numpy as np 
 
-from pyjin import pyjin
-from module import db_module
+from ..pyjin import pyjin
+from . import db_module
 
 def get_df_whole(acc, 
                  db, 

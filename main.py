@@ -7,13 +7,11 @@ import sys
 
 import pandas as pd
 
-from pyjin import pyjin
-from x_x import account_info as ai
-import sync_tables
-from module import all_delete_insert
-from module import delete_upsert
-from module import create_table
-from module import db_module
+from .pyjin import pyjin
+from .module import all_delete_insert
+from .module import delete_upsert
+from .module import create_table
+from .module import db_module
 
 def get_mode(acc_from, 
              acc_to, 
@@ -47,14 +45,9 @@ def get_mode(acc_from,
     elif primary_key in columns_df_from:
         return primary_key
 
-def main(batch_mode):           
-    '''
-    mode 0 -> non_urgent_mode
-    mode 1 -> urgent mode
-    '''                
-    table_list = sync_tables.Infor.table_list if batch_mode == 0 else sync_tables.Infor_urgent.table_list
+def main(list_infor):           
      
-    for row in table_list:  
+    for row in list_infor:  
         pyjin.print_logging('{}.{} table sync...'.format(row['db_from'], row['table_from']))
                         
         '''
