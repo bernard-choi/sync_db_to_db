@@ -5,7 +5,8 @@ import functools
 
 import pandas as pd
 
-from  .module import all_delete_insert
+from .pyjin import pyjin
+from .module import all_delete_insert
 from .module import delete_upsert
 from .module import create_table
 from .module import db_module
@@ -33,7 +34,7 @@ def get_mode(df_from,
     elif primary_key in columns_df_from:
         return primary_key
 
-def batch(input_dict, 
+def main(input_dict, 
           sync_info: dict,          
           *args,
           **kwargs):
