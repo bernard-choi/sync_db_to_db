@@ -23,8 +23,7 @@ def get_mode(df_from,
         
         return 'no_table'   
     
-    columns_df_from = df_from.columns.tolist()
-        
+    columns_df_from = df_from.columns.tolist()        
         
     if primary_key is None:            
         return primary_key
@@ -33,7 +32,7 @@ def get_mode(df_from,
     elif primary_key in columns_df_from:
         return primary_key
 
-def batch(input_dict, 
+def main(input_dict, 
           sync_info: dict,          
           *args,
           **kwargs):
@@ -62,7 +61,7 @@ def batch(input_dict,
         all_delete_insert.delete_all_insert_all(acc_to = sync_info['acc_to'],
                                                 df=df,
                                                 table_to = sync_info['table_to'],
-                                                db_to = sync_info['db_to'])
+                                                db_to = sync_info['db_to'])                
         pyjin.print_logging('delete all data and insert all data')  
         
                     
@@ -85,18 +84,20 @@ def batch(input_dict,
         
     return True
 
+'''
 def batch_bulk(list_input_dict,
                list_sync_info,
                *args,
                **kwargs):
     [batch(sync_info=sync_info, input_dict= input_dict) for input_dict, sync_info in zip(list_input_dict, list_sync_info)]
     return True
+'''
         
-## test
+## example
 if __name__ == '__main__':
     
-    list_input_dict = [{'id':1, 'col':'test'},]
-    list_sync_info = [{        
+    input_dict = [{'id':1, 'col':'test'},]
+    sync_info = {        
         'acc_to' : ai.vmdb_sql_info(),                
         'db_to' : 'data_sc',
         'table_to' : 'test',
@@ -104,6 +105,6 @@ if __name__ == '__main__':
         'update_method' : 'update', # update, delete_all 선택가능
         'create_table_schema' : None,
         'column_matching_method' : 'to', # input과 output이 다를경우 sync 맞출 컬럼
-    }]
+    }
 
-    batch_bulk(list_input_dict = list_input_dict, list_sync_info = list_sync_info)
+    main(list_input_dict = list_input_dict, list_sync_info = list_sync_info)
