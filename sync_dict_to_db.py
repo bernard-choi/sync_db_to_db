@@ -9,6 +9,8 @@ from  .module import all_delete_insert
 from .module import delete_upsert
 from .module import create_table
 from .module import db_module
+from .pyjin import pyjin
+from .pyjin import pyjin_db
 
 def get_mode(df_from,
              acc_to,              
