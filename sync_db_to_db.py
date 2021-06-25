@@ -46,7 +46,7 @@ def get_mode(acc_from,
         return primary_key    
 
 
-def main(dict_infor):
+def main(**dict_infor):
     pyjin.print_logging('{}.{} table sync...'.format(dict_infor['db_from'], dict_infor['table_from']))
                     
     '''

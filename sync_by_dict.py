@@ -86,18 +86,6 @@ def main(input_dict,
         
     return True
 
-<<<<<<< HEAD:sync_dict_to_db.py
-'''
-def batch_bulk(list_input_dict,
-               list_sync_info,
-               *args,
-               **kwargs):
-    [batch(sync_info=sync_info, input_dict= input_dict) for input_dict, sync_info in zip(list_input_dict, list_sync_info)]
-    return True
-'''
-        
-=======
->>>>>>> 35822a3319a3d8ab1ad955af4c2a7171d2e99828:sync_by_dict.py
 ## example
 if __name__ == '__main__':
     
