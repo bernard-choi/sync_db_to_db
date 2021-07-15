@@ -37,7 +37,6 @@ def get_insert_update_delete_ids(df_from, df_to, primary_key, mode):
         update_ids = np.array([])
         
     insert_ids = np.setdiff1d(ids_from, ids_to)
-    pyjin.print_logging('insert_ids, {} update_ids {}, update_ids, {}'.format(len(insert_ids), len(update_ids), len(delete_ids)))
     return insert_ids, update_ids, delete_ids
 
 
