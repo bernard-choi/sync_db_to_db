@@ -29,7 +29,7 @@ def get_insert_update_delete_ids(df_from, df_to, primary_key, mode):
         # update 할 id
         temp = pd.merge(df_from, df_to, on=primary_key)
         # 타입이 다른 경우 string으로 통일
-        if temp[['update_date_x']].dtypes[0] != temp[['update_date_y']].dtypes[0]:
+        if temp['update_date_x'].dtypes != temp['update_date_y'].dtypes:
             temp['update_date_x'] = temp.apply(lambda x: str(x['update_date_x']), axis=1)
             temp['update_date_y'] = temp.apply(lambda x: str(x['update_date_y']), axis=1) 
         update_ids = temp[temp['update_date_x'] != temp['update_date_y']][primary_key].to_numpy()        
