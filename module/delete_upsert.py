@@ -26,13 +26,17 @@ def get_insert_update_delete_ids(df_from, df_to, primary_key, mode):
     delete_ids = np.setdiff1d(ids_to, ids_from)
 
     if mode == '{},update_date'.format(primary_key):
-        ## update 할 id
+        # update 할 id
         temp = pd.merge(df_from, df_to, on=primary_key)
+        # 타입이 다른 경우 string으로 통일
+        if temp['update_date_x'].dtypes != temp['update_date_y'].dtypes:
+            temp['update_date_x'] = temp.apply(lambda x: str(x['update_date_x']), axis=1)
+            temp['update_date_y'] = temp.apply(lambda x: str(x['update_date_y']), axis=1) 
         update_ids = temp[temp['update_date_x'] != temp['update_date_y']][primary_key].to_numpy()        
     else: ## update 필드가 없는경우
         update_ids = np.array([])
         
-    insert_ids = np.setdiff1d(ids_from, ids_to)        
+    insert_ids = np.setdiff1d(ids_from, ids_to)
     return insert_ids, update_ids, delete_ids
 
 
